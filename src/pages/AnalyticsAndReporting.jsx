@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useAppContext } from '../context/AppContextUtils';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, LineController, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';
 import StatCard from '../components/StatCard';
 import DollarSignIcon from '../components/icons/DollarSignIcon';
@@ -15,6 +16,7 @@ Chart.register(
 );
 
 const AnalyticsAndReporting = () => {
+    const { theme: _theme } = useAppContext();
     const barChartRef = useRef(null);
 
     useEffect(() => {
@@ -58,10 +60,10 @@ const AnalyticsAndReporting = () => {
     ];
 
     return (
-        <div className="space-y-8">
-            <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-bold">Analytics & Reporting</h2>
-                <div className="bg-gray-700 text-white py-2 px-4 rounded-lg">Last 30 Days</div>
+    <div className="space-y-8 rounded-lg shadow-lg" style={{ backgroundColor: 'var(--component-bg)', color: 'var(--component-text)' }}>
+            <div className="flex justify-between items-center p-6 border-b" style={{ borderColor: 'var(--purple-light)' }}>
+                <h2 className="text-3xl font-bold" style={{ color: 'var(--purple-light)' }}>Analytics & Reporting</h2>
+                <div className="py-2 px-4 rounded-lg" style={{ backgroundColor: 'var(--chip-bg)' }}>Last 30 Days</div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard icon={<DollarSignIcon />} title="Gross Sales" value="$152,870" />
@@ -69,23 +71,23 @@ const AnalyticsAndReporting = () => {
                 <StatCard icon={<UsersIcon />} title="Orders" value="1,432" />
                 <StatCard icon={<StoreIcon />} title="Avg. Order Value" value="$106.75" />
             </div>
-            <div className="bg-gray-800 p-6 rounded-lg h-96">
+            <div className="p-6 rounded-lg h-96 border" style={{ backgroundColor: 'var(--surface-1)', borderColor: 'var(--border-color)' }}>
                 <h3 className="text-lg font-bold mb-4">Sales Over Time</h3>
                 <canvas ref={barChartRef}></canvas>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-gray-800 rounded-lg p-6">
+                <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--surface-1)', borderColor: 'var(--border-color)' }}>
                     <h3 className="text-lg font-bold mb-4">Top Selling Products</h3>
                     <table className="w-full text-left">
-                        <thead><tr className="border-b border-gray-700"><th className="p-2">Rank</th><th className="p-2">Product</th><th className="p-2">Units Sold</th><th className="p-2">Revenue</th></tr></thead>
-                        <tbody>{topProducts.map(p => <tr key={p.rank} className="border-b border-gray-700/50 hover:bg-gray-700/50"><td className="p-2">{p.rank}</td><td className="p-2">{p.name}</td><td className="p-2">{p.units}</td><td className="p-2 font-mono">${p.revenue.toFixed(2)}</td></tr>)}</tbody>
+                        <thead><tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)', borderColor: 'var(--border-color)' }}><th className="p-2">Rank</th><th className="p-2">Product</th><th className="p-2">Units Sold</th><th className="p-2">Revenue</th></tr></thead>
+                        <tbody>{topProducts.map(p => <tr key={p.rank} className="border-b" style={{ borderColor: 'var(--border-color)' }}><td className="p-2">{p.rank}</td><td className="p-2">{p.name}</td><td className="p-2">{p.units}</td><td className="p-2 font-mono">${p.revenue.toFixed(2)}</td></tr>)}</tbody>
                     </table>
                 </div>
-                <div className="bg-gray-800 rounded-lg p-6">
+                <div className="rounded-lg p-6 border" style={{ backgroundColor: 'var(--surface-1)', borderColor: 'var(--border-color)' }}>
                     <h3 className="text-lg font-bold mb-4">Top Performing Sellers</h3>
                     <table className="w-full text-left">
-                        <thead><tr className="border-b border-gray-700"><th className="p-2">Rank</th><th className="p-2">Seller</th><th className="p-2">Orders</th><th className="p-2">Revenue</th></tr></thead>
-                        <tbody>{topSellers.map(s => <tr key={s.rank} className="border-b border-gray-700/50 hover:bg-gray-700/50"><td className="p-2">{s.rank}</td><td className="p-2">{s.name}</td><td className="p-2">{s.orders}</td><td className="p-2 font-mono">${s.revenue.toFixed(2)}</td></tr>)}</tbody>
+                        <thead><tr className="border-b" style={{ backgroundColor: 'var(--table-header-bg)', borderColor: 'var(--border-color)' }}><th className="p-2">Rank</th><th className="p-2">Seller</th><th className="p-2">Orders</th><th className="p-2">Revenue</th></tr></thead>
+                        <tbody>{topSellers.map(s => <tr key={s.rank} className="border-b" style={{ borderColor: 'var(--border-color)' }}><td className="p-2">{s.rank}</td><td className="p-2">{s.name}</td><td className="p-2">{s.orders}</td><td className="p-2 font-mono">${s.revenue.toFixed(2)}</td></tr>)}</tbody>
                     </table>
                 </div>
             </div>

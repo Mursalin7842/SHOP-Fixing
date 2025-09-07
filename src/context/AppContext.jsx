@@ -1,10 +1,14 @@
-import React, { createContext, useState, useContext } from 'react';
-
-export const AppContext = createContext();
+import React, { useState, useEffect } from 'react';
+import { AppContext } from './AppContextUtils';
 
 export const AppProvider = ({ children }) => {
     const [theme, setTheme] = useState('dark');
     const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+    useEffect(() => {
+        document.body.classList.remove('light', 'dark');
+        document.body.classList.add(theme);
+    }, [theme]);
 
     const toggleTheme = () => {
         setTheme(prevTheme => (prevTheme === 'dark' ? 'light' : 'dark'));
@@ -15,12 +19,8 @@ export const AppProvider = ({ children }) => {
     };
 
     return (
-        <AppContext.Provider value={{ theme, toggleTheme, isSidebarOpen, toggleSidebar }}>
+        <AppContext.Provider value={{ theme, setTheme, toggleTheme, isSidebarOpen, toggleSidebar }}>
             {children}
         </AppContext.Provider>
     );
-};
-
-export const useAppContext = () => {
-    return useContext(AppContext);
 };

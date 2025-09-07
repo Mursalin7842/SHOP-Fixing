@@ -1,5 +1,4 @@
 import { FETCH_SELLERS_REQUEST, FETCH_SELLERS_SUCCESS, FETCH_SELLERS_FAILURE } from '../../constants/actionTypes';
-import apiClient from '../../api/api';
 import { MOCK_DATA } from '../../api/mockData';
 
 // This is a comment to explain the purpose of this file.

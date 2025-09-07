@@ -36,15 +36,14 @@ const SellerApproval = ({ initialTab = 'pending' }) => {
     };
 
     return (
-        <div className="bg-[var(--component-bg)] rounded-lg shadow-lg text-white">
-            <div className="p-6 border-b border-[var(--purple-light)] flex flex-wrap gap-4 justify-between items-center">
+    <div className="rounded-lg shadow-lg" style={{ backgroundColor: 'var(--component-bg)', color: 'var(--component-text)' }}>
+            <div className="p-6 border-b flex flex-wrap gap-4 justify-between items-center" style={{ borderColor: 'var(--purple-light)' }}>
                 <div className="flex-grow">
-                    <h2 className="text-2xl font-bold">Seller Approval</h2>
-                    <div className="flex space-x-1 sm:space-x-4 mt-4 border-b border-[var(--purple-light)]">
-                        <button onClick={() => setActiveTab('pending')} className={`py-2 px-1 text-sm font-medium ${activeTab === 'pending' ? 'border-b-2 border-blue-500 text-white' : 'text-gray-400'}`}>Pending</button>
-                        <button onClick={() => setActiveTab('approved')} className={`py-2 px-1 text-sm font-medium ${activeTab === 'approved' ? 'border-b-2 border-blue-500 text-white' : 'text-gray-400'}`}>Approved</button>
-                        <button onClick={() => setActiveTab('rejected')} className={`py-2 px-1 text-sm font-medium ${activeTab === 'rejected' ? 'border-b-2 border-blue-500 text-white' : 'text-gray-400'}`}>Rejected</button>
-                        <button onClick={() => setActiveTab('modification')} className={`py-2 px-1 text-sm font-medium ${activeTab === 'modification' ? 'border-b-2 border-blue-500 text-white' : 'text-gray-400'}`}>Modification</button>
+                    <h2 className="text-2xl font-bold" style={{ color: 'var(--purple-light)' }}>Seller Approval</h2>
+                    <div className="flex space-x-1 sm:space-x-4 mt-4 border-b" style={{ borderColor: 'var(--border-color)' }}>
+                        {['pending','approved','rejected','modification'].map(tab => (
+                            <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 px-1 text-sm font-medium ${activeTab === tab ? 'border-b-2' : ''}`} style={{ borderColor: activeTab === tab ? 'var(--purple-light)' : 'transparent', color: activeTab === tab ? 'var(--text-color)' : 'var(--muted-text)' }}>{tab.charAt(0).toUpperCase()+tab.slice(1)}</button>
+                        ))}
                     </div>
                 </div>
                 <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} placeholder="Search sellers..." />
@@ -52,7 +51,7 @@ const SellerApproval = ({ initialTab = 'pending' }) => {
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="bg-gray-700/50">
+                        <tr style={{ backgroundColor: 'var(--table-header-bg)' }}>
                             <th className="p-4">Seller Name</th><th className="p-4">Shop Name</th>
                             <th className="p-4">{getStatusDateLabel()}</th><th className="p-4">Status</th><th className="p-4 text-center">Actions</th>
                         </tr>
@@ -61,16 +60,16 @@ const SellerApproval = ({ initialTab = 'pending' }) => {
                         {loading && <tr><td colSpan="5" className="text-center p-8">Loading...</td></tr>}
                         {error && <tr><td colSpan="5" className="text-center p-8 text-red-500">{error}</td></tr>}
                         {!loading && !error && filteredSellers.length > 0 ? filteredSellers.map(seller => (
-                            <tr key={seller.id} className="border-b border-[var(--purple-light)] hover:bg-gray-700/50">
+                            <tr key={seller.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
                                 <td className="p-4">{seller.name}</td><td className="p-4">{seller.shopName}</td>
                                 <td className="p-4">{seller.dateApplied}</td>
                                 <td className="p-4"><StatusBadge status={seller.status || 'Pending'} /></td>
                                 <td className="p-4 text-center space-x-2">
-                                    <Button color="purple" onClick={() => setSelectedSeller(seller)}>View</Button>
+                                    <Button color="primary" onClick={() => setSelectedSeller(seller)}>View</Button>
                                 </td>
                             </tr>
                         )) : (
-                            <tr><td colSpan="5" className="text-center p-8 text-gray-400">No sellers in this category.</td></tr>
+                            <tr><td colSpan="5" className="text-center p-8" style={{ color: 'var(--muted-text)' }}>No sellers in this category.</td></tr>
                         )}
                     </tbody>
                 </table>

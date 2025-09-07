@@ -1,12 +1,28 @@
-# React + Vite
+# Admin Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + Tailwind + Redux admin panel.
 
-Currently, two official plugins are available:
+## Quick start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install deps
+2. Run dev server
 
-## Expanding the ESLint configuration
+## Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `npm run dev` — start Vite dev server
+- `npm run build` — production build
+- `npm run preview` — preview prod build
+- `npm run lint` — lint source
+
+## Tailwind
+
+Configured via `tailwind.config.js` and `src/styles/index.css`.
+
+## Authentication
+
+No authentication is wired by default. See `DOCUMENTATION.md` → “Adding Authentication” for guidance when you’re ready to integrate an IdP.
+
+## Troubleshooting
+
+- Port conflicts: if 5173 is busy, Vite will choose another port; check the console output.
+- CSS not applied: ensure Tailwind is installed and `index.css` is imported in `main.jsx`.

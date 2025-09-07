@@ -26,9 +26,9 @@ const SellerManagement = () => {
     }
 
     return (
-        <div className="bg-gray-800 rounded-lg shadow-lg">
-            <div className="p-6 border-b border-gray-700 flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Seller & Shop Management</h2>
+        <div className="bg-[var(--component-bg)] text-[var(--component-text)] rounded-lg shadow-lg">
+            <div className="p-6 border-b border-[var(--purple-light)] flex justify-between items-center">
+                <h2 className="text-2xl font-bold" style={{ color: 'var(--purple-light)' }}>Seller & Shop Management</h2>
                 <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} placeholder="Search by seller name or ID..." />
             </div>
             <div className="overflow-x-auto">
@@ -36,16 +36,16 @@ const SellerManagement = () => {
                 {error && <p className="text-center p-8 text-red-500">{error}</p>}
                 {!loading && !error && (
                     <table className="w-full text-left">
-                        <thead><tr className="bg-gray-700/50"><th className="p-4">Seller Name</th><th className="p-4">Seller ID</th><th className="p-4">Shops</th><th className="p-4">Member Since</th><th className="p-4 text-center">Actions</th></tr></thead>
+            <thead><tr style={{ backgroundColor: 'var(--table-header-bg)' }}><th className="p-4">Seller Name</th><th className="p-4">Seller ID</th><th className="p-4">Shops</th><th className="p-4">Member Since</th><th className="p-4 text-center">Actions</th></tr></thead>
                         <tbody>
                             {filteredSellers.map(seller => (
-                                <tr key={seller.id} className="border-b border-gray-700 hover:bg-gray-700/50">
+                <tr key={seller.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
                                     <td className="p-4">{seller.name}</td>
                                     <td className="p-4 font-mono">{seller.id}</td>
                                     <td className="p-4">{seller.shops.length}</td>
                                     <td className="p-4">{seller.memberSince}</td>
                                     <td className="p-4 text-center">
-                                        <button onClick={() => setViewingSeller(seller)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Details</button>
+                    <button onClick={() => setViewingSeller(seller)} className="text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--button-primary-text)' }}>View Details</button>
                                     </td>
                                 </tr>
                             ))}

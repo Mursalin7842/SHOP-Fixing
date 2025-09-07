@@ -10,4 +10,6 @@ const apiClient = axios.create({
     }
 });
 
+// Note: No auth by default; add an interceptor here when backend auth is ready.
+
 export default apiClient;

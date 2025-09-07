@@ -1,51 +1,122 @@
-import React from 'react';
-import { useAppContext } from '../context/AppContext';
-import DashboardIcon from '../components/icons/DashboardIcon';
-import SellerApprovalIcon from '../components/icons/SellerApprovalIcon';
-import ShopApprovalIcon from '../components/icons/ShopApprovalIcon';
-import ProductApprovalIcon from '../components/icons/ProductApprovalIcon';
-import AnalyticsIcon from '../components/icons/AnalyticsIcon';
-import PaymentManagementIcon from '../components/icons/PaymentManagementIcon';
-import SellerManagementIcon from '../components/icons/SellerManagementIcon';
-import UserReportsIcon from '../components/icons/UserReportsIcon';
-import LogoutIcon from '../components/icons/LogoutIcon';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useAppContext } from '../context/AppContextUtils';
 
-const Sidebar = ({ navigateTo, activePage }) => {
-    const { isSidebarOpen } = useAppContext();
+// Import your page components
+import Dashboard from '../pages/Dashboard';
+import SellerApproval from '../pages/SellerApproval';
+import ShopApproval from '../pages/ShopApproval';
+import ProductApproval from '../pages/ProductApproval';
+import AnalyticsAndReporting from '../pages/AnalyticsAndReporting';
+import PaymentManagement from '../pages/PaymentManagement';
+import SellerManagement from '../pages/SellerManagement';
+import UserReports from '../pages/UserReports';
+import Notifications from '../pages/Notifications';
+import Profile from '../pages/Profile';
+import Settings from '../pages/Settings';
+import Header from './Header';
+import Sidebar from './Sidebar';
 
-    const navItems = [
-        { id: 'dashboard', icon: <DashboardIcon />, label: 'Dashboard' },
-        { id: 'seller-approval', icon: <SellerApprovalIcon />, label: 'Seller Approval' },
-        { id: 'shop-approval', icon: <ShopApprovalIcon />, label: 'Shop Approval' },
-        { id: 'product-approval', icon: <ProductApprovalIcon />, label: 'Product Approval' },
-        { id: 'analytics', icon: <AnalyticsIcon />, label: 'Analytics' },
-        { id: 'payment-management', icon: <PaymentManagementIcon />, label: 'Payments' },
-        { id: 'seller-management', icon: <SellerManagementIcon />, label: 'Seller Management' },
-        { id: 'user-reports', icon: <UserReportsIcon />, label: 'User Reports' },
-    ];
+const navItems = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'seller-approval', label: 'Seller Approval' },
+    { id: 'shop-approval', label: 'Shop Approval' },
+    { id: 'product-approval', label: 'Product Approval' },
+    { id: 'analytics', label: 'Analytics' },
+    { id: 'payment-management', label: 'Payments' },
+    { id: 'seller-management', label: 'Seller Management' },
+    { id: 'user-reports', label: 'User Reports' },
+];
 
-    return (
-        <aside className={`bg-[var(--component-bg)] text-white flex-col transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
-            <div className="h-20 flex items-center justify-center text-2xl font-bold text-white border-b border-[var(--purple-light)]">
-                <span className="w-8 h-8 bg-gray-500 rounded-full mr-2"></span> {/* Logo Placeholder */}
-                Tour On Go
-            </div>
-            <nav className="flex-1 px-4 py-6">
-                {navItems.map(item => (
-                    <a key={item.id} href="#" onClick={(e) => { e.preventDefault(); navigateTo(item.id); }} className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-colors duration-200 ${activePage === item.id ? 'bg-[var(--purple-light)]' : 'hover:bg-[var(--purple-light)]'}`}>
-                        <span className="w-6 h-6 mr-4">{item.icon}</span>
-                        <span className="truncate">{item.label}</span>
-                    </a>
-                ))}
-            </nav>
-            <div className="px-4 py-6 border-t border-[var(--purple-light)]">
-                <a href="#" onClick={(e) => { e.preventDefault(); navigateTo('logout'); }} className="flex items-center px-4 py-3 rounded-lg hover:bg-[var(--purple-light)]">
-                    <span className="w-6 h-6 mr-4"><LogoutIcon /></span>
-                    <span className="truncate">Logout</span>
-                </a>
-            </div>
-        </aside>
-    );
+const pageComponents = {
+    'dashboard': Dashboard,
+    'seller-approval': SellerApproval,
+    'shop-approval': ShopApproval,
+    'product-approval': ProductApproval,
+    'analytics': AnalyticsAndReporting,
+    'payment-management': PaymentManagement,
+    'seller-management': SellerManagement,
+    'user-reports': UserReports,
+    'notifications': Notifications,
+    'profile': (props) => <Profile {...props} user={props.userInfo} />, // pass userInfo down
+    'settings': Settings,
 };
 
-export default Sidebar;
+const AdminLayout = ({ userInfo, onLogout }) => {
+    const getPageFromHash = () => {
+        if (typeof window === 'undefined') return 'dashboard';
+        const h = window.location.hash.replace(/^#\/?/, '');
+        return pageComponents[h] ? h : 'dashboard';
+    };
+    const [activePage, setActivePage] = useState(getPageFromHash);
+    const { isSidebarOpen } = useAppContext();
+
+    // Keep active page in sync with URL hash so header links like #/profile work
+    useEffect(() => {
+        const onHash = () => setActivePage(getPageFromHash());
+        window.addEventListener('hashchange', onHash);
+        return () => window.removeEventListener('hashchange', onHash);
+    }, []);
+
+    // If hash points to login while authenticated, redirect to dashboard
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const h = window.location.hash.replace(/^#\/?/, '') || '';
+            if (h === 'login') {
+                window.location.hash = '/dashboard';
+            }
+        }
+    }, []);
+
+    const pageTitleMap = useMemo(() => ({
+        ...Object.fromEntries(navItems.map(i => [i.id, i.label])),
+        notifications: 'Notifications',
+        profile: 'Profile',
+        settings: 'Settings',
+    }), []);
+
+    // Scroll to section logic for Dashboard
+    const scrollToSection = (sectionId) => {
+        setTimeout(() => {
+            const el = document.getElementById(sectionId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100); // Wait for render
+    };
+
+    const navigateTo = (pageId) => {
+        if (pageId === 'logout') {
+            onLogout && onLogout();
+        } else if (activePage === 'dashboard' && [
+            'approval-queues', 'critical-alerts', 'stat-cards'
+        ].includes(pageId)) {
+            scrollToSection(pageId);
+        } else {
+            // push into hash for consistency with header links
+            if (typeof window !== 'undefined') {
+                window.location.hash = `/${pageId}`;
+            } else {
+                setActivePage(pageId);
+            }
+        }
+    };
+
+    const ActivePageComponent = pageComponents[activePage] || Dashboard;
+
+    return (
+        <div className="flex flex-col h-screen bg-[var(--background-color)] text-[var(--text-color)]">
+            <Header
+                title={pageTitleMap[activePage] || 'Dashboard'}
+                userInfo={userInfo || {}}
+                onLogout={onLogout}
+            />
+            <div className="flex flex-1 min-h-0">
+                {isSidebarOpen && <Sidebar navigateTo={navigateTo} activePage={activePage} />}
+                <main className="flex-1 overflow-auto p-6 bg-[var(--surface-2)] text-[var(--text-color)]">
+                    <ActivePageComponent navigateTo={navigateTo} userInfo={userInfo} />
+                </main>
+            </div>
+        </div>
+    );
+};
+export default AdminLayout;

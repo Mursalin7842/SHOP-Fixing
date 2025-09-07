@@ -13,7 +13,8 @@ const SearchBar = ({ searchTerm, setSearchTerm, placeholder }) => (
             placeholder={placeholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg pl-10 pr-4 py-2 focus:outline-none"
+            style={{ backgroundColor: 'var(--input-bg)', color: 'var(--input-text)', borderColor: 'var(--border-color)', borderWidth: 1 }}
         />
     </div>
 );

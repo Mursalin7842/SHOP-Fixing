@@ -6,7 +6,7 @@ import ProductApprovalIcon from './icons/ProductApprovalIcon';
 // This is a comment to explain the purpose of this component.
 // The ActivityFeed component displays a list of recent activities in the admin panel.
 const ActivityFeed = () => (
-    <div className="bg-gray-800 p-6 rounded-lg h-full">
+    <div className="p-6 rounded-lg h-full card" style={{ backgroundColor: 'var(--surface-1)', color: 'var(--component-text)' }}>
         <h3 className="text-lg font-bold mb-4">Recent Activity</h3>
         <ul>
             {[
@@ -15,15 +15,15 @@ const ActivityFeed = () => (
                 { id: 3, type: 'product', text: 'Product "Cyber-Knit Jacket" was flagged for review.', time: '1 hour ago' },
                 { id: 4, type: 'seller', text: 'New seller application from Green Gardens.', time: '3 hours ago' },
             ].map(activity => (
-                <li key={activity.id} className="flex items-center space-x-4 py-3 border-b border-gray-700 last:border-b-0">
-                    <div className="bg-gray-700 p-2 rounded-full">
+                <li key={activity.id} className="flex items-center space-x-4 py-3 border-b last:border-b-0" style={{ borderColor: 'var(--border-color)' }}>
+                    <div className="p-2 rounded-full" style={{ backgroundColor: 'var(--chip-bg)' }}>
                         {activity.type === 'seller' && <SellerApprovalIcon />}
                         {activity.type === 'payment' && <PaymentManagementIcon />}
                         {activity.type === 'product' && <ProductApprovalIcon />}
                     </div>
                     <div>
                         <p className="text-sm">{activity.text}</p>
-                        <p className="text-xs text-gray-500">{activity.time}</p>
+                        <p className="text-xs" style={{ color: 'var(--muted-text)' }}>{activity.time}</p>
                     </div>
                 </li>
             ))}
