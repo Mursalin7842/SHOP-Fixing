@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --purple-dark: #4c1d95;
+  --purple-light: #6d28d9;
+  --purple-text: #ddd6fe;
+  --deep-violet: #312e81;
+  --light-bg: #f3f4f6;
+  --dark-bg: #111827;
+  --light-text: #1f2937;
+  --dark-text: #f9fafb;
+
+  --btn-green: #16a34a;
+  --btn-yellow: #f59e0b;
+  --btn-red: #dc2626;
+  --btn-gray: #4b5563;
+
+  --badge-green-bg: #dcfce7;
+  --badge-green-text: #166534;
+  --badge-yellow-bg: #fef9c3;
+  --badge-yellow-text: #854d0e;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #991b1b;
+}
+
+body.dark {
+  --background-color: var(--dark-bg);
+  --text-color: var(--dark-text);
+  --component-bg: var(--purple-dark);
+  --component-text: var(--purple-text);
+}
+
+body.light {
+  --background-color: var(--light-bg);
+  --text-color: var(--light-text);
+  --component-bg: var(--purple-dark); /* As per user request, components are still purple */
+  --component-text: var(--purple-text);
+}
+
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--button-border-color);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--button-background-color);
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: var(--button-hover-border-color);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
