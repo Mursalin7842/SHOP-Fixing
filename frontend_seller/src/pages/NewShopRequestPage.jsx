@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Button from '../components/Button';
 import { requestShop } from '../features/shopsSlice';
+import { shopFilesApi } from '../api/api';
 
 const NewShopRequestPage = ({ onBack }) => {
   const dispatch = useDispatch();
@@ -21,7 +22,7 @@ const NewShopRequestPage = ({ onBack }) => {
   });
   const [uploads, setUploads] = useState({ nidFile: null, tradeFile: null, otherFiles: [] });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     const required = ['name','category','description','address','phone','email','nid'];
     for (const key of required) { if (!String(form[key]||'').trim()) return; }
@@ -30,7 +31,32 @@ const NewShopRequestPage = ({ onBack }) => {
       form.tradeLicense ? { type: 'TradeLicense', number: form.tradeLicense, fileName: uploads.tradeFile?.name } : null,
     ].filter(Boolean);
     const attachments = (uploads.otherFiles||[]).map(f => ({ name: f.name, size: f.size }));
-    dispatch(requestShop({ ...form, documents, attachments }));
+    // First create a basic shop on backend to obtain an ID
+    let created = null;
+    try {
+      const res = await fetch('http://localhost:8000/api/shop/submit/', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('seller_access_token')}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name })
+      });
+      if (res.ok) created = await res.json();
+    } catch {
+      // ignore and keep local-only
+    }
+    const newShopId = created?.id || `shop-${Date.now()}`;
+    dispatch(requestShop({ ...form, id: newShopId, documents, attachments }));
+    // Upload files if we have a real backend shop id
+    if (created?.id) {
+      try {
+        if (uploads.nidFile) await shopFilesApi.uploadDocument(created.id, { file: uploads.nidFile, doc_type: 'NID', number: form.nid });
+        if (uploads.tradeFile && form.tradeLicense) await shopFilesApi.uploadDocument(created.id, { file: uploads.tradeFile, doc_type: 'TradeLicense', number: form.tradeLicense });
+        for (const f of (uploads.otherFiles||[])) {
+          await shopFilesApi.uploadAttachment(created.id, { file: f, name: f.name });
+        }
+      } catch {
+        // ignore upload errors in this draft
+      }
+    }
     if (typeof onBack === 'function') onBack();
   };
 
@@ -112,6 +138,14 @@ const NewShopRequestPage = ({ onBack }) => {
           </div>
         </form>
         <p className="text-xs text-[var(--muted-text)] mt-3">Admin will review provided information and documents before approving your shop.</p>
+        <div className="mt-4 text-sm">
+          <div className="font-semibold mb-1">Files selected:</div>
+          <ul className="list-disc pl-5 text-[var(--muted-text)]">
+            {uploads.nidFile && <li>NID: {uploads.nidFile.name}</li>}
+            {uploads.tradeFile && <li>Trade License: {uploads.tradeFile.name}</li>}
+            {(uploads.otherFiles||[]).map((f,i)=>(<li key={i}>Attachment: {f.name}</li>))}
+          </ul>
+        </div>
       </div>
     </div>
   );

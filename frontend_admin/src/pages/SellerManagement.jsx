@@ -11,15 +11,18 @@ const SellerManagement = () => {
     const [viewingSeller, setViewingSeller] = useState(null);
 
     const dispatch = useDispatch();
-    const { loading, sellers: allSellers, error } = useSelector(state => state.sellers);
+    const { loading, sellers: allSellers = [], error } = useSelector(state => state.sellers || {});
 
     useEffect(() => {
         dispatch(fetchSellers());
     }, [dispatch]);
 
-    const filteredSellers = allSellers.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.id.toLowerCase().includes(searchTerm.toLowerCase()));
+    const term = searchTerm.toLowerCase();
+    const filteredSellers = (allSellers || []).filter(s => {
+        const name = (s.name || '').toLowerCase();
+        const idStr = String(s.id || '');
+        return name.includes(term) || idStr.includes(term);
+    });
 
     if (viewingSeller) {
         return <SellerDetailsPage seller={viewingSeller} onBack={() => setViewingSeller(null)} />
@@ -38,11 +41,11 @@ const SellerManagement = () => {
                     <table className="w-full text-left">
             <thead><tr style={{ backgroundColor: 'var(--table-header-bg)' }}><th className="p-4">Seller Name</th><th className="p-4">Seller ID</th><th className="p-4">Shops</th><th className="p-4">Member Since</th><th className="p-4 text-center">Actions</th></tr></thead>
                         <tbody>
-                            {filteredSellers.map(seller => (
+                {filteredSellers.map(seller => (
                 <tr key={seller.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
                                     <td className="p-4">{seller.name}</td>
                                     <td className="p-4 font-mono">{seller.id}</td>
-                                    <td className="p-4">{seller.shops.length}</td>
+                    <td className="p-4">{(seller.shops && seller.shops.length) || seller.shopsCount || 0}</td>
                                     <td className="p-4">{seller.memberSince}</td>
                                     <td className="p-4 text-center">
                     <button onClick={() => setViewingSeller(seller)} className="text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--button-primary-text)' }}>View Details</button>

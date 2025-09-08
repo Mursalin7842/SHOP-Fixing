@@ -22,6 +22,12 @@ export const shopsSlice = createSlice({
   name: 'shops',
   initialState,
   reducers: {
+    setShops: (state, action) => {
+      const arr = Array.isArray(action.payload) ? action.payload : [];
+      state.shops = arr;
+      const approved = arr.find(s => s.status === 'approved');
+      state.activeShopId = approved ? approved.id : (arr[0]?.id || null);
+    },
     setActiveShop: (state, action) => {
       state.activeShopId = action.payload || null;
     },
@@ -55,6 +61,6 @@ export const shopsSlice = createSlice({
   }
 });
 
-export const { setActiveShop, requestShop, addShopDocument } = shopsSlice.actions;
+export const { setShops, setActiveShop, requestShop, addShopDocument } = shopsSlice.actions;
 
 export default shopsSlice.reducer;

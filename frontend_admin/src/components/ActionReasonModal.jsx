@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 const ActionReasonModal = ({ isOpen, onClose, onSubmit, actionType }) => {
     const [reason, setReason] = useState('');
     const [comment, setComment] = useState('');
+    const [error, setError] = useState('');
 
     const reasons = {
         denied: ['Violates Policy', 'Incomplete Information', 'Spam/Fraudulent', 'Other'],
@@ -12,14 +13,18 @@ const ActionReasonModal = ({ isOpen, onClose, onSubmit, actionType }) => {
         rejected: ['Violates Policy', 'Counterfeit Item', 'Prohibited Item', 'Other'],
     };
 
+    const reset = () => { setReason(''); setComment(''); setError(''); };
+
     const handleSubmit = () => {
         if (!reason) {
-            // In a real app, show a user-friendly error message
-            console.error("Please select a reason.");
+            setError('Please select a reason.');
             return;
         }
         onSubmit({ reason, comment });
+        reset();
     };
+
+    const handleClose = () => { reset(); onClose(); };
 
     if (!isOpen) return null;
 
@@ -47,6 +52,7 @@ const ActionReasonModal = ({ isOpen, onClose, onSubmit, actionType }) => {
                             <option value="">-- Select a reason --</option>
                             {(reasons[actionType] || []).map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
+                        {error && <p className="mt-2 text-sm" style={{ color: 'var(--badge-red-text)' }}>{error}</p>}
                     </div>
                     <div>
                         <label className="block mb-2" style={{ color: 'var(--muted-text)' }}>Additional Comments (Optional)</label>
@@ -61,7 +67,7 @@ const ActionReasonModal = ({ isOpen, onClose, onSubmit, actionType }) => {
                     </div>
                 </div>
                 <div className="p-4 flex justify-end space-x-3 border-t" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-color)' }}>
-                    <button onClick={onClose} className="font-bold py-2 px-4 rounded text-white" style={{ backgroundColor: 'var(--btn-gray)' }}>Cancel</button>
+                    <button onClick={handleClose} className="font-bold py-2 px-4 rounded text-white" style={{ backgroundColor: 'var(--btn-gray)' }}>Cancel</button>
                     <button onClick={handleSubmit} className="font-bold py-2 px-4 rounded text-white" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--button-primary-text)' }}>Submit</button>
                 </div>
             </div>

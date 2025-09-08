@@ -30,17 +30,20 @@ const shopsReducer = (state = initialState, action) => {
             return { loading: false, items: initialState.items, error: action.payload };
         case APPROVE_SHOP: {
             const id = action.payload;
-            const shop = state.items.pending.find(s=>s.id===id) || state.items.modification.find(s=>s.id===id);
-            return { ...state, items: { ...state.items, approved: shop ? [...state.items.approved, { ...shop, statusDate: new Date().toISOString().slice(0,10) }] : state.items.approved, pending: state.items.pending.filter(s=>s.id!==id), modification: state.items.modification.filter(s=>s.id!==id) } };
+            const shop = state.items.pending.find(s=>s.id===id) || state.items.modification.find(s=>s.id===id) || state.items.rejected.find(s=>s.id===id);
+            return { ...state, items: { ...state.items, approved: shop ? [...state.items.approved, { ...shop, statusDate: new Date().toISOString().slice(0,10) }] : state.items.approved, pending: state.items.pending.filter(s=>s.id!==id), modification: state.items.modification.filter(s=>s.id!==id), rejected: state.items.rejected.filter(s=>s.id!==id) } };
         }
         case REJECT_SHOP: {
             const id = action.payload;
-            const shop = state.items.pending.find(s=>s.id===id) || state.items.modification.find(s=>s.id===id);
-            return { ...state, items: { ...state.items, rejected: shop ? [...state.items.rejected, { ...shop, statusDate: new Date().toISOString().slice(0,10) }] : state.items.rejected, pending: state.items.pending.filter(s=>s.id!==id), modification: state.items.modification.filter(s=>s.id!==id) } };
+            const shop = state.items.pending.find(s=>s.id===id) || state.items.modification.find(s=>s.id===id) || state.items.approved.find(s=>s.id===id);
+            return { ...state, items: { ...state.items, rejected: shop ? [...state.items.rejected, { ...shop, statusDate: new Date().toISOString().slice(0,10) }] : state.items.rejected, pending: state.items.pending.filter(s=>s.id!==id), modification: state.items.modification.filter(s=>s.id!==id), approved: state.items.approved.filter(s=>s.id!==id) } };
         }
         case REQUEST_SHOP_MODIFICATION: {
             const { id } = action.payload || {};
-            return { ...state, items: { ...state.items, modification: state.items.modification.map(s=> s.id===id? { ...s, resubmitted:false }: s), pending: state.items.pending.filter(s=>s.id!==id) } };
+            const from = [...state.items.pending, ...state.items.approved, ...state.items.rejected];
+            const found = from.find(s=>s.id===id);
+            const updated = found ? { ...found, resubmitted:false, statusDate: new Date().toISOString().slice(0,10) } : null;
+            return { ...state, items: { ...state.items, modification: updated ? [...state.items.modification, updated] : state.items.modification, pending: state.items.pending.filter(s=>s.id!==id), approved: state.items.approved.filter(s=>s.id!==id), rejected: state.items.rejected.filter(s=>s.id!==id) } };
         }
         default:
             return state;

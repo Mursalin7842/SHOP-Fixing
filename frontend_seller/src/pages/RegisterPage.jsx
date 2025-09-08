@@ -3,6 +3,8 @@ import { UploadCloudIcon } from '../components/icons/index.jsx';
 
 const categories = ['Electronics', 'Fashion', 'Grocery', 'Home & Living', 'Beauty & Health', 'Automotive', 'Books', 'Other'];
 
+import apiClient from '../api/api';
+
 const RegisterPage = ({ onRegister, showLogin }) => {
   const [form, setForm] = useState({
     fullName: '',
@@ -39,14 +41,24 @@ const RegisterPage = ({ onRegister, showLogin }) => {
 
   const formValid = allFilled && emailOk && phoneOk && pwdOk && pwdMatch;
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     // mark all fields touched to show errors
     const keys = Object.keys(form);
     const t = {}; keys.forEach(k => t[k] = true);
     setTouched(t);
     if (!formValid) return;
-    onRegister?.({ ...form, licenseFileName: licenseFile?.name, nidFileName: nidFile?.name, termsAccepted: terms });
+    try {
+      // Map to backend minimal register-seller endpoint
+      await apiClient.post('/users/register-seller/', {
+        username: form.email || form.fullName.replace(/\s+/g, '').toLowerCase(),
+        email: form.email,
+        password: form.password,
+      });
+      onRegister?.({ ...form, licenseFileName: licenseFile?.name, nidFileName: nidFile?.name, termsAccepted: terms });
+    } catch (err) {
+      alert(err?.response?.data?.detail || err.message || 'Registration failed');
+    }
   };
 
   const errMsg = (field) => {

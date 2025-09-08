@@ -1,9 +1,14 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { approvePayout, rejectPayout } from '../../redux/actions/paymentActions';
 import ArrowLeftIcon from '../icons/ArrowLeftIcon';
 
 // This is a comment to explain the purpose of this component.
 // The PayoutDetailsPage component displays the details of a single payout.
-const PayoutDetailsPage = ({ payout, onBack }) => (
+const PayoutDetailsPage = ({ payout, onBack }) => {
+    const dispatch = useDispatch();
+    const txns = Array.isArray(payout.transactions) ? payout.transactions : [];
+    return (
     <div className="rounded-lg shadow-lg p-6" style={{ backgroundColor: 'var(--surface-1)', color: 'var(--component-text)' }}>
         <button onClick={onBack} className="flex items-center space-x-2 mb-6" style={{ color: 'var(--sidebar-link-color)' }}>
             <ArrowLeftIcon />
@@ -14,22 +19,44 @@ const PayoutDetailsPage = ({ payout, onBack }) => (
                 <h3 className="text-xl font-bold">Payout Details</h3>
                 <div><p style={{ color: 'var(--muted-text)' }}>Payout ID</p><p className="font-mono">{payout.id}</p></div>
                 <div><p style={{ color: 'var(--muted-text)' }}>Seller</p><p>{payout.seller}</p></div>
-                <div><p style={{ color: 'var(--muted-text)' }}>Amount</p><p className="text-2xl font-mono" style={{ color: 'var(--btn-green)' }}>${payout.amount.toFixed(2)}</p></div>
+                <div><p style={{ color: 'var(--muted-text)' }}>Amount</p><p className="text-2xl font-mono" style={{ color: 'var(--btn-green)' }}>${Number(payout.amount || 0).toFixed(2)}</p></div>
                 <div><p style={{ color: 'var(--muted-text)' }}>Requested</p><p>{payout.requestedDate}</p></div>
-                <div><p style={{ color: 'var(--muted-text)' }}>Status</p><span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'var(--badge-yellow-bg)', color: 'var(--badge-yellow-text)' }}>{payout.status}</span></div>
+                                <div><p style={{ color: 'var(--muted-text)' }}>Status</p><span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'var(--badge-yellow-bg)', color: 'var(--badge-yellow-text)' }}>{payout.status}</span></div>
+                                <div className="space-y-1 text-sm">
+                                    <p className="font-semibold">Payment Info</p>
+                                    {payout.method === 'BANK' && (
+                                        <div>
+                                            <div>Bank: {payout.bank_name || '-'}</div>
+                                            <div>Account: {payout.account_number || '-'}</div>
+                                            <div>Routing: {payout.routing_number || '-'}</div>
+                                            <div>Holder: {payout.holder_name || '-'}</div>
+                                        </div>
+                                    )}
+                                    {payout.method === 'MOBILE' && (
+                                        <div>
+                                            <div>Provider: {payout.mobile_provider || '-'}</div>
+                                            <div>Wallet: {payout.mobile_wallet_number || '-'}</div>
+                                        </div>
+                                    )}
+                                    {payout.method === 'CARD' && (
+                                        <div>
+                                            <div>Card: {payout.card_brand || '-'} ****{payout.card_last4 || ''}</div>
+                                        </div>
+                                    )}
+                                </div>
                 <div className="pt-4 flex space-x-2">
-                    <button className="w-full text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--button-primary-text)' }}>Approve</button>
-                    <button className="w-full text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--btn-gray)' }}>Deny</button>
+                    <button onClick={() => dispatch(approvePayout(payout.id))} className="w-full text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--button-primary-text)' }}>Approve</button>
+                    <button onClick={() => dispatch(rejectPayout(payout.id))} className="w-full text-white font-bold py-2 px-4 rounded" style={{ backgroundColor: 'var(--btn-gray)' }}>Deny</button>
                 </div>
             </div>
             <div className="md:col-span-2">
-                <h3 className="text-xl font-bold mb-4">Included Transactions ({payout.transactions.length})</h3>
+                <h3 className="text-xl font-bold mb-4">Included Transactions ({txns.length})</h3>
                 <div className="p-4 rounded-lg max-h-96 overflow-y-auto" style={{ backgroundColor: 'var(--surface-2)' }}>
                     <table className="w-full text-left">
                         <thead><tr><th className="p-2">Transaction ID</th><th className="p-2">Order ID</th><th className="p-2">Amount</th></tr></thead>
                         <tbody>
-                            {payout.transactions.map(t => (
-                                <tr key={t.id} className="border-b" style={{ borderColor: 'var(--border-color)' }}><td className="p-2 font-mono">{t.id}</td><td className="p-2 font-mono">{t.orderId}</td><td className="p-2 font-mono">${t.amount.toFixed(2)}</td></tr>
+                            {txns.map(t => (
+                                <tr key={t.id} className="border-b" style={{ borderColor: 'var(--border-color)' }}><td className="p-2 font-mono">{t.id}</td><td className="p-2 font-mono">{t.orderId}</td><td className="p-2 font-mono">${Number(t.amount || 0).toFixed(2)}</td></tr>
                             ))}
                         </tbody>
                     </table>
@@ -38,5 +65,6 @@ const PayoutDetailsPage = ({ payout, onBack }) => (
         </div>
     </div>
 );
+}
 
 export default PayoutDetailsPage;

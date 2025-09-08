@@ -9,14 +9,17 @@ import Button from "./Button";
 const ApplicationModal = ({ application, onClose, onAction, type = 'seller' }) => {
     const [actionReasonModal, setActionReasonModal] = useState({ isOpen: false, type: '' });
     const [messageModalOpen, setMessageModalOpen] = useState(false);
-    if (!application) return null;
+    if (!application || !application.id) return null;
 
     const handleActionClick = (actionType) => {
+        if (!actionType) return; // safety guard
         setActionReasonModal({ isOpen: true, type: actionType });
     };
 
+    // Map internal UI label 'denied' to backend status 'rejected'
     const handleReasonSubmit = ({ reason, comment }) => {
-        onAction(application.id, actionReasonModal.type, { reason, comment });
+        const mapped = actionReasonModal.type === 'denied' ? 'rejected' : actionReasonModal.type;
+        onAction(application.id, mapped, { reason, comment });
         setActionReasonModal({ isOpen: false, type: '' });
         onClose();
     };
@@ -24,8 +27,12 @@ const ApplicationModal = ({ application, onClose, onAction, type = 'seller' }) =
 
     return (
         <>
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="rounded-lg shadow-xl w-full max-w-2xl transform transition-all border" style={{ backgroundColor: 'var(--surface-1)', color: 'var(--component-text)', borderColor: 'var(--border-color)' }}>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+            <div
+                className="rounded-lg shadow-xl w-full max-w-2xl transform transition-all border"
+                style={{ backgroundColor: 'var(--surface-1)', color: 'var(--component-text)', borderColor: 'var(--border-color)' }}
+                onClick={(e)=>e.stopPropagation()}
+            >
                     <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: 'var(--border-color)' }}>
                         <h3 className="text-xl font-bold">{type === 'seller' ? 'Seller' : 'Shop'} Application Review</h3>
                         <button onClick={onClose} className="p-1 rounded-full"><CloseIcon /></button>
@@ -42,7 +49,7 @@ const ApplicationModal = ({ application, onClose, onAction, type = 'seller' }) =
                                 <div><p style={{ color: 'var(--muted-text)' }}>Business Description</p><p>High-quality, futuristic electronic gadgets and accessories. Focused on cutting-edge technology and design.</p></div>
                                 <div><p style={{ color: 'var(--muted-text)' }}>Documents</p><p className="hover:underline cursor-pointer" style={{ color: 'var(--purple-light)' }}>business_license.pdf</p></div>
                             </>
-                        ) : (
+                                                ) : (
                             <>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div><p style={{ color: 'var(--muted-text)' }}>Shop Name</p><p>{application.shopName}</p></div>
@@ -51,6 +58,26 @@ const ApplicationModal = ({ application, onClose, onAction, type = 'seller' }) =
                                     <div><p style={{ color: 'var(--muted-text)' }}>Date Applied</p><p>{application.dateApplied}</p></div>
                                 </div>
                                 <div><p style={{ color: 'var(--muted-text)' }}>Shop Description</p><p>{application.description}</p></div>
+                                                                {(Array.isArray(application.documents) && application.documents.length > 0) && (
+                                                                    <div>
+                                                                        <p className="font-semibold mt-3">Documents</p>
+                                                                        <ul className="list-disc pl-5 text-sm">
+                                                                                                                    {application.documents.map(d => (
+                                                                                                                        <li key={d.id}><a href={d.file_url || d.file} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{d.doc_type}{d.number ? ` (#${d.number})` : ''}</a></li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                )}
+                                                                {(Array.isArray(application.attachments) && application.attachments.length > 0) && (
+                                                                    <div>
+                                                                        <p className="font-semibold mt-3">Attachments</p>
+                                                                        <ul className="list-disc pl-5 text-sm">
+                                                                                                                    {application.attachments.map(a => (
+                                                                                                                        <li key={a.id}><a href={a.file_url || a.file} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{a.name || 'Attachment'}</a></li>
+                                                                            ))}
+                                                                        </ul>
+                                                                    </div>
+                                                                )}
                             </>
                         )}
                         <div className="pt-4">
@@ -83,7 +110,7 @@ const ApplicationModal = ({ application, onClose, onAction, type = 'seller' }) =
                 isOpen={actionReasonModal.isOpen}
                 onClose={() => setActionReasonModal({ isOpen: false, type: '' })}
                 onSubmit={handleReasonSubmit}
-                actionType={actionReasonModal.type}
+                actionType={actionReasonModal.type || 'rejected'}
             />
             {messageModalOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">

@@ -33,8 +33,26 @@ const productsReducer = (state = initialState, action) => {
             return { loading: false, items: initialState.items, error: action.payload };
         case APPROVE_PRODUCT: {
             const id = action.payload;
-            const approve = (items) => items.map(p => p.id === id ? { ...p, status: 'approved' } : p);
-            return { ...state, items: { ...state.items, approved: approve(state.items.approved), pending: state.items.pending.filter(p=>p.id!==id), modification: state.items.modification.filter(p=>p.id!==id), rejected: state.items.rejected.filter(p=>p.id!==id) } };
+            const fromGroups = ['pending','modification','rejected','flagged'];
+            const existing = state.items.approved.find(p=>p.id===id);
+            let moved = existing;
+            if (!moved) {
+                for (const g of fromGroups) {
+                    moved = (state.items[g] || []).find(p=>p.id===id) || moved;
+                }
+            }
+            const approved = moved ? [...state.items.approved, { ...moved, status: 'approved' }] : state.items.approved;
+            return {
+                ...state,
+                items: {
+                    ...state.items,
+                    approved,
+                    pending: state.items.pending.filter(p=>p.id!==id),
+                    modification: state.items.modification.filter(p=>p.id!==id),
+                    rejected: state.items.rejected.filter(p=>p.id!==id),
+                    flagged: (state.items.flagged||[]).filter(p=>p.id!==id),
+                }
+            };
         }
         case REJECT_PRODUCT: {
             const id = action.payload;
@@ -43,8 +61,20 @@ const productsReducer = (state = initialState, action) => {
         }
         case REQUEST_PRODUCT_MODIFICATION: {
             const { id, note } = action.payload || {};
-            const moveToMod = (items) => items.map(p => p.id === id ? { ...p, status: 'modification', history: [...(p.history||[]), { action:'Requested modification', admin:'Admin', date: new Date().toLocaleString(), details: note }] } : p);
-            return { ...state, items: { ...state.items, modification: moveToMod(state.items.modification), pending: state.items.pending.filter(p=>p.id!==id) } };
+            const source = [...state.items.pending, ...state.items.approved, ...state.items.rejected, ...(state.items.flagged||[])];
+            const prod = source.find(p=>p.id===id);
+            const withHistory = prod ? { ...prod, status: 'modification', history: [...(prod.history||[]), { action:'Requested modification', admin:'Admin', date: new Date().toLocaleString(), details: note }] } : null;
+            return {
+                ...state,
+                items: {
+                    ...state.items,
+                    modification: withHistory ? [...state.items.modification, withHistory] : state.items.modification,
+                    pending: state.items.pending.filter(p=>p.id!==id),
+                    approved: state.items.approved.filter(p=>p.id!==id),
+                    rejected: state.items.rejected.filter(p=>p.id!==id),
+                    flagged: (state.items.flagged||[]).filter(p=>p.id!==id),
+                }
+            };
         }
         case APPROVE_PRODUCT_VARIANTS: {
             const { id, variantKeys = [] } = action.payload || {};

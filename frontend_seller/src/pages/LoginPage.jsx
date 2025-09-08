@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient, { setAuthTokens } from '../api/api';
 
 const LoginPage = ({ onLogin, showRegister }) => {
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -10,6 +11,21 @@ const LoginPage = ({ onLogin, showRegister }) => {
     alert(`Password reset link sent to ${email}`);
     setForgotOpen(false);
     setEmail('');
+  };
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const username = form.get('email');
+    const password = form.get('password');
+    try {
+      const { data } = await apiClient.post('/auth/token/', { username, password });
+      setAuthTokens({ access: data.access, refresh: data.refresh });
+      onLogin?.({ name: username, email: username, shopName: '' });
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Invalid credentials or account not approved yet.';
+      alert(msg);
+    }
   };
 
   return (
@@ -25,14 +41,14 @@ const LoginPage = ({ onLogin, showRegister }) => {
             <p className="text-sm text-[var(--muted-text)] mt-1">Seller Portal</p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); onLogin?.({ name: 'John Doe', email: 'john.doe@example.com', shopName: 'JD Electronics' }); }} className="space-y-4">
+      <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[var(--muted-text)] mb-1">Email address</label>
-              <input id="email" type="email" placeholder="you@example.com" autoComplete="email" required className="w-full bg-[var(--input-bg)] text-[var(--input-text)] border border-[var(--border-color)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required className="w-full bg-[var(--input-bg)] text-[var(--input-text)] border border-[var(--border-color)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[var(--muted-text)] mb-1">Password</label>
-              <input id="password" type="password" placeholder="••••••••" autoComplete="current-password" required className="w-full bg-[var(--input-bg)] text-[var(--input-text)] border border-[var(--border-color)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input id="password" name="password" type="password" placeholder="••••••••" autoComplete="current-password" required className="w-full bg-[var(--input-bg)] text-[var(--input-text)] border border-[var(--border-color)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm text-[var(--muted-text)]">

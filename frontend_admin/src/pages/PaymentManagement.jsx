@@ -4,6 +4,7 @@ import SearchBar from '../components/SearchBar';
 import TransactionDetailsPage from '../components/payment/TransactionDetailsPage';
 import PayoutDetailsPage from '../components/payment/PayoutDetailsPage';
 import Button from '../components/Button';
+import { approvePayout, rejectPayout } from '../redux/actions/paymentActions';
 import StatusBadge from '../components/StatusBadge';
 import { fetchPayments } from '../redux/actions/paymentActions';
 
@@ -18,22 +19,23 @@ const PaymentManagement = () => {
 
     useEffect(() => { dispatch(fetchPayments()); }, [dispatch]);
 
-    const filteredTransactions = useMemo(() => (transactions || []).filter(t =>
-        t.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.customer.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [transactions, searchTerm]);
+        // Safe normalization helper so numeric IDs or missing fields don't crash filtering
+        const norm = (v) => (v === null || v === undefined) ? '' : String(v).toLowerCase();
+        const term = searchTerm.toLowerCase();
 
-    const filteredPayouts = useMemo(() => (payouts || []).filter(p =>
-        p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.seller.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [payouts, searchTerm]);
+        const filteredTransactions = useMemo(() => (transactions || []).filter(t => {
+            return norm(t.id).includes(term) || norm(t.orderId).includes(term) || norm(t.customer).includes(term);
+        }), [transactions, term]);
+
+    const filteredPayouts = useMemo(() => (payouts || []).filter(p => {
+        return norm(p.id).includes(term) || norm(p.seller).includes(term);
+    }), [payouts, term]);
 
     if (view === 'transaction_details') {
         return <TransactionDetailsPage transaction={selectedItem} onBack={() => { setView('list'); setSelectedItem(null); }} />
     }
     if (view === 'payout_details') {
-        return <PayoutDetailsPage payout={selectedItem} onBack={() => { setView('list'); setSelectedItem(null); }} />
+    return <PayoutDetailsPage payout={selectedItem} onBack={() => { setView('list'); setSelectedItem(null); }} />
     }
 
     return (
@@ -60,10 +62,16 @@ const PaymentManagement = () => {
                                 <tr><td colSpan="6" className="text-center p-8 text-red-500">{error}</td></tr>
                             ) : filteredPayouts.map(payout => (
                                 <tr key={payout.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
-                                    <td className="p-4 font-mono">{payout.id}</td><td className="p-4">{payout.seller}</td><td className="p-4 font-mono">${payout.amount.toFixed(2)}</td><td className="p-4">{payout.requestedDate}</td>
+                                    <td className="p-4 font-mono">{payout.id}</td><td className="p-4">{payout.seller}</td><td className="p-4 font-mono">${Number(payout.amount || 0).toFixed(2)}</td><td className="p-4">{payout.requestedDate}</td>
                                     <td className="p-4"><StatusBadge status={payout.status} /></td>
-                                    <td className="p-4 text-center">
+                                    <td className="p-4 text-center space-x-2">
                                         <Button color="primary" onClick={() => { setView('payout_details'); setSelectedItem(payout); }}>View Details</Button>
+                                        {payout.status === 'Pending' && (
+                                            <>
+                                                <Button color="green" onClick={() => dispatch(approvePayout(payout.id))}>Approve</Button>
+                                                <Button color="gray" onClick={() => dispatch(rejectPayout(payout.id))}>Deny</Button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -82,7 +90,7 @@ const PaymentManagement = () => {
                                 <tr><td colSpan="6" className="text-center p-8 text-red-500">{error}</td></tr>
                             ) : filteredTransactions.map(t => (
                                 <tr key={t.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
-                                    <td className="p-4 font-mono">{t.id}</td><td className="p-4 font-mono">{t.orderId}</td><td className="p-4">{t.customer}</td><td className="p-4 font-mono">${t.total.toFixed(2)}</td><td className="p-4">{t.date}</td>
+                                    <td className="p-4 font-mono">{t.id}</td><td className="p-4 font-mono">{t.orderId}</td><td className="p-4">{t.customer}</td><td className="p-4 font-mono">${Number(t.total || 0).toFixed(2)}</td><td className="p-4">{t.date}</td>
                                     <td className="p-4 text-center">
                                         <Button color="primary" onClick={() => { setView('transaction_details'); setSelectedItem(t); }}>View Details</Button>
                                     </td>

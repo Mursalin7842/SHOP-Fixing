@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SearchBar from '../components/SearchBar';
 import ApplicationModal from '../components/ApplicationModal';
-import { fetchSellers } from '../redux/actions/sellerActions';
+import { fetchSellers, approveSeller, rejectSeller } from '../redux/actions/sellerActions';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 
@@ -18,13 +18,16 @@ const SellerApproval = ({ initialTab = 'pending' }) => {
         dispatch(fetchSellers());
     }, [dispatch]);
 
-    const filteredSellers = allSellers.filter(s =>
+    const filteredSellers = allSellers
+        .filter(s => (activeTab === 'pending' ? s.status === 'pending' : activeTab === 'approved' ? s.status === 'approved' : activeTab === 'rejected' ? s.status === 'rejected' : true))
+        .filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleAction = (id, status, details) => {
-        console.log(`Seller ${id} action: ${status}`, details);
+    const handleAction = (id, status) => {
+        if (status === 'approved') dispatch(approveSeller(id));
+        if (status === 'rejected') dispatch(rejectSeller(id));
     };
 
     const getStatusDateLabel = () => {
@@ -63,7 +66,7 @@ const SellerApproval = ({ initialTab = 'pending' }) => {
                             <tr key={seller.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
                                 <td className="p-4">{seller.name}</td><td className="p-4">{seller.shopName}</td>
                                 <td className="p-4">{seller.dateApplied}</td>
-                                <td className="p-4"><StatusBadge status={seller.status || 'Pending'} /></td>
+                                <td className="p-4"><StatusBadge status={seller.status || 'pending'} /></td>
                                 <td className="p-4 text-center space-x-2">
                                     <Button color="primary" onClick={() => setSelectedSeller(seller)}>View</Button>
                                 </td>

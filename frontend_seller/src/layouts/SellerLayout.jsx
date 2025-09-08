@@ -1,5 +1,5 @@
 // This component renders the main layout for the seller panel, including the sidebar and header. It also handles the routing between pages.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { DashboardIcon, PackageIcon, ShoppingCartIcon, DollarSignIcon, StoreIcon, StarIcon, LifeBuoyIcon } from '../components/icons/index.jsx';
@@ -16,7 +16,15 @@ import { useDispatch } from 'react-redux';
 import { setViewingOrder } from '../features/orderSlice';
 
 const SellerLayout = ({ userInfo, onLogout, products, setProducts, orders, productFilter, setProductFilter, viewingProduct, setViewingProduct }) => {
-  const [activePage, setActivePage] = useState('dashboard');
+  // Derive initial page from URL hash like admin (#/products, etc.)
+  const getPageFromHash = () => {
+    if (typeof window === 'undefined') return 'dashboard';
+    const h = window.location.hash.replace(/^#\/?/, '');
+    const valid = ['dashboard','products','orders','orderDetails','shop','reviews','payouts','support','settings'];
+    return valid.includes(h) ? h : 'dashboard';
+  };
+
+  const [activePage, setActivePage] = useState(getPageFromHash);
   const dispatch = useDispatch();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -41,6 +49,24 @@ const SellerLayout = ({ userInfo, onLogout, products, setProducts, orders, produ
     { id: 'payouts', icon: <DollarSignIcon />, label: 'Payouts' },
     { id: 'support', icon: <LifeBuoyIcon />, label: 'Support' },
   ];
+
+  // Keep active page in sync with URL hash and vice versa
+  useEffect(() => {
+    const onHash = () => {
+      const next = getPageFromHash();
+      setActivePage(prev => (prev !== next ? next : prev));
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const cur = window.location.hash.replace(/^#\/?/, '');
+    if (cur !== activePage) {
+      window.location.hash = `/${activePage}`;
+    }
+  }, [activePage]);
 
   function navigateTo(page) {
     if (page === 'logout') { onLogout(); return; }

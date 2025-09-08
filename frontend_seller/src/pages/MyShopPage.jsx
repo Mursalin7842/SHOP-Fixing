@@ -3,12 +3,35 @@ import { useDispatch, useSelector } from 'react-redux';
 import StatusBadge from '../components/StatusBadge';
 import Button from '../components/Button';
 import { setActiveShop } from '../features/shopsSlice';
+import { setShops } from '../features/shopsSlice';
 import NewShopRequestPage from './NewShopRequestPage';
 import ShopProductDetailsPage from './ShopProductDetailsPage';
+import apiClient from '../api/api';
 
 const MyShopPage = () => {
   const dispatch = useDispatch();
   const { shops, activeShopId } = useSelector(s => s.shops);
+  // Load shops from backend for the logged-in seller
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await apiClient.get('/shop/mine/');
+        if (!mounted) return;
+        const mapped = (Array.isArray(data) ? data : []).map(s => ({
+          id: s.id,
+          name: s.name,
+          category: '',
+          status: s.status || 'pending',
+          documents: [],
+        }));
+        dispatch(setShops(mapped));
+      } catch {
+        // ignore if unauthorized
+      }
+    })();
+    return () => { mounted = false; };
+  }, [dispatch]);
   // old inline form removed; use NewShopRequestPage instead
 
   // inline form removed in favor of dedicated NewShopRequestPage

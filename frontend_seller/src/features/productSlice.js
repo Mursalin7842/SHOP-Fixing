@@ -12,6 +12,9 @@ export const productSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
+    setProducts: (state, action) => {
+      state.products = Array.isArray(action.payload) ? action.payload : [];
+    },
     addProduct: (state, action) => {
       state.products.push(action.payload);
     },
@@ -126,6 +129,6 @@ export const productSlice = createSlice({
   },
 });
 
-export const { addProduct, addReviewResponse, resolveReport, updateStock, updateVariantStock, requestEdit, cancelPendingEdit, approvePendingChanges, rejectPendingChanges, addAdminFeedback, setProductFilter, setViewingProduct } = productSlice.actions;
+export const { setProducts, addProduct, addReviewResponse, resolveReport, updateStock, updateVariantStock, requestEdit, cancelPendingEdit, approvePendingChanges, rejectPendingChanges, addAdminFeedback, setProductFilter, setViewingProduct } = productSlice.actions;
 
 export default productSlice.reducer;

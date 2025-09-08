@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import SearchBar from '../components/SearchBar';
 import ApplicationModal from '../components/ApplicationModal';
+import apiClient from '../api/api';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import { fetchShops } from '../redux/actions/shopActions';
+import { fetchShops, approveShop, rejectShop, requestShopModification } from '../redux/actions/shopActions';
 import { APPROVE_SHOP, REJECT_SHOP, REQUEST_SHOP_MODIFICATION } from '../constants/actionTypes';
 
 const ShopApproval = ({ initialTab = 'pending' }) => {
@@ -13,19 +14,20 @@ const ShopApproval = ({ initialTab = 'pending' }) => {
     const [selectedShop, setSelectedShop] = useState(null);
     const dispatch = useDispatch();
     const { loading, items: shopGroups, error } = useSelector(state => state.shops);
+    const [shopDetail, setShopDetail] = useState(null);
 
     useEffect(() => { dispatch(fetchShops()); }, [dispatch]);
 
     const handleAction = (id, status, details) => {
         switch (status) {
             case 'approved':
-                dispatch({ type: APPROVE_SHOP, payload: id });
+                dispatch(approveShop(id));
                 break;
             case 'rejected':
-                dispatch({ type: REJECT_SHOP, payload: id });
+                dispatch(rejectShop(id));
                 break;
             case 'modification':
-                dispatch({ type: REQUEST_SHOP_MODIFICATION, payload: { id, note: details?.comment || details?.reason } });
+                dispatch(requestShopModification(id, details?.comment || details?.reason));
                 break;
             default:
                 break;
@@ -33,11 +35,13 @@ const ShopApproval = ({ initialTab = 'pending' }) => {
     };
 
     const list = useMemo(() => shopGroups[activeTab] || [], [shopGroups, activeTab]);
-    const filteredShops = list.filter(s =>
-        s.shopName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.sellerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const lcSearch = searchTerm.toLowerCase();
+    const filteredShops = list.filter(s => {
+        const shopName = (s.shopName || '').toLowerCase();
+        const sellerName = (s.sellerName || '').toLowerCase();
+        const category = (s.category || '').toLowerCase();
+        return shopName.includes(lcSearch) || sellerName.includes(lcSearch) || category.includes(lcSearch);
+    });
 
     const getStatusDateLabel = () => {
         switch (activeTab) {
@@ -78,7 +82,10 @@ const ShopApproval = ({ initialTab = 'pending' }) => {
                                 <td className="p-4">{shop.statusDate || shop.dateApplied}</td>
                                 <td className="p-4"><StatusBadge status={activeTab} /></td>
                                 <td className="p-4 text-center">
-                                    <Button color="primary" onClick={() => setSelectedShop(shop)}>View</Button>
+                                    <Button color="primary" onClick={async () => {
+                                        setSelectedShop(shop);
+                                        try { const { data } = await apiClient.get(`/shop/${shop.id}/`); setShopDetail(data); } catch { setShopDetail(null); }
+                                    }}>View</Button>
                                 </td>
                             </tr>
                         )) : (
@@ -87,7 +94,18 @@ const ShopApproval = ({ initialTab = 'pending' }) => {
                     </tbody>
                 </table>
             </div>
-            <ApplicationModal application={selectedShop} onClose={() => setSelectedShop(null)} onAction={handleAction} type="shop" />
+            {selectedShop && (
+                <ApplicationModal
+                    application={{
+                        ...selectedShop,
+                        documents: shopDetail?.documents || [],
+                        attachments: shopDetail?.attachments || []
+                    }}
+                    onClose={() => { setSelectedShop(null); setShopDetail(null); }}
+                    onAction={handleAction}
+                    type="shop"
+                />
+            )}
         </div>
     );
 };

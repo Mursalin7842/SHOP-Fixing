@@ -14,8 +14,12 @@ const reportsReducer = (state = initialState, action) => {
     switch (action.type) {
         case FETCH_REPORTS_REQUEST:
             return { ...state, loading: true };
-        case FETCH_REPORTS_SUCCESS:
-            return { loading: false, items: action.payload, error: '' };
+        case FETCH_REPORTS_SUCCESS: {
+            const p = action.payload || {};
+            // If backend returned a flat list { reports: [...] }, wrap it into a simple grouping for UI
+            const items = p.items || (p.reports ? { new: p.reports, progress: [], resolved: [] } : initialState.items);
+            return { loading: false, items, error: '' };
+        }
         case FETCH_REPORTS_FAILURE:
             return { loading: false, items: initialState.items, error: action.payload };
         default:

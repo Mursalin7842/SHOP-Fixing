@@ -4,7 +4,7 @@ import SearchBar from '../components/SearchBar';
 import ProductModal from '../components/ProductModal';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
-import { fetchProducts } from '../redux/actions/productActions';
+import { fetchProducts, approveProduct, rejectProduct, requestProductModification, approveProductVariants } from '../redux/actions/productActions';
 import { APPROVE_PRODUCT, REJECT_PRODUCT, REQUEST_PRODUCT_MODIFICATION, APPROVE_PRODUCT_VARIANTS } from '../constants/actionTypes';
 
 const ProductApproval = ({ initialTab = 'pending' }) => {
@@ -20,16 +20,16 @@ const ProductApproval = ({ initialTab = 'pending' }) => {
     const handleAction = (id, status, details) => {
         switch (status) {
             case 'approved':
-                dispatch({ type: APPROVE_PRODUCT, payload: id });
+                dispatch(approveProduct(id));
                 break;
             case 'rejected':
-                dispatch({ type: REJECT_PRODUCT, payload: id });
+                dispatch(rejectProduct(id));
                 break;
             case 'modification':
-                dispatch({ type: REQUEST_PRODUCT_MODIFICATION, payload: { id, note: details?.comment || details?.reason } });
+                dispatch(requestProductModification(id, details?.comment || details?.reason));
                 break;
             case 'approve_variants':
-                dispatch({ type: APPROVE_PRODUCT_VARIANTS, payload: { id, variantKeys: details?.variantKeys || [] } });
+                dispatch(approveProductVariants(id, details?.variantKeys || []));
                 break;
             default:
                 break;

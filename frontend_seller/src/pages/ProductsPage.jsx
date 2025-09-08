@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Button from '../components/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { addProduct, updateStock, requestEdit } from '../features/productSlice';
+import { addProduct, setProducts, updateStock, requestEdit } from '../features/productSlice';
 import Modal from '../components/Modal';
 import OrderStatus from '../components/OrderStatus';
 import StatusBadge from '../components/StatusBadge';
 import Rating from '../components/Rating';
 import { PlusCircleIcon, EyeIcon, EditIcon, TrashIcon } from '../components/icons/index.jsx';
+import apiClient from '../api/api';
 
 const AddProductModal = ({ onClose }) => {
   const [name, setName] = useState('');
@@ -16,41 +17,71 @@ const AddProductModal = ({ onClose }) => {
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]); // array of File
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
+  const [shops, setShops] = useState([]); // seller shops
+  const [shopId, setShopId] = useState('');
   const dispatch = useDispatch();
-  const activeShopId = useSelector(s => s.shops.activeShopId);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await apiClient.get('/shop/mine/');
+        const list = Array.isArray(data) ? data : [];
+        setShops(list);
+        // Prefer first approved, else first any
+        const approved = list.find(s => s.status === 'approved');
+        if (approved) setShopId(String(approved.id));
+        else if (list[0]) setShopId(String(list[0].id));
+      } catch {/* ignore */}
+    })();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  if (!activeShopId) { alert('Please select an approved active shop from the header before adding products.'); return; }
-    const firstImageUrl = images[0] ? URL.createObjectURL(images[0]) : `https://placehold.co/600x400/1E293B/FFFFFF?text=${name.replace(' ', '+')}`;
-    const gallery = images.map(f => ({ name: f.name, url: URL.createObjectURL(f) }));
-    const cleanSpecs = specs.filter(s => s.key.trim() && s.value.trim());
-    dispatch(addProduct({
-      id: Date.now(),
-      shopId: activeShopId || null,
-      name,
-      category,
-      price: parseFloat(price),
-      stock: parseInt(stock),
-      description,
-      imageUrl: firstImageUrl,
-      images: gallery,
-      specifications: cleanSpecs,
-      status: 'pending',
-      reviews: [],
-      reports: [],
-    }));
-    onClose();
+    if (!shopId) { alert('You must have (or create) a shop before adding products.'); return; }
+    if (!price || isNaN(Number(price))) { alert('Enter a valid price'); return; }
+    const numericShopId = Number(shopId);
+    if (Number.isNaN(numericShopId)) { alert('Invalid shop selected'); return; }
+    try {
+      const payload = { shop: numericShopId, name, price: parseFloat(price), description, category };
+      const { data } = await apiClient.post('/products/submit/', payload);
+      dispatch(addProduct({
+        id: data.id,
+        shopId: data.shop || numericShopId,
+        name: data.name,
+        category: data.category || category,
+        price: Number(data.price),
+        stock: Number(stock) || 0,
+        description: data.description || '',
+        imageUrl: `https://placehold.co/600x400/1E293B/FFFFFF?text=${encodeURIComponent(data.name)}`,
+        images: [],
+        specifications: [],
+        status: data.status || 'pending',
+        reviews: [],
+        reports: [],
+      }));
+      onClose();
+    } catch (err) {
+      alert(err?.response?.data?.detail || err.message || 'Failed to submit product');
+    }
   };
 
   return (
     <Modal onClose={onClose} title="Add New Product">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[var(--muted-text)] mb-1">Shop</label>
+            <select value={shopId} onChange={e => setShopId(e.target.value)} required className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+              <option value="" disabled>Select a shop</option>
+              {shops.map(s => (
+                <option key={s.id} value={s.id}>{s.name} {s.status !== 'approved' ? `(${s.status})` : ''}</option>
+              ))}
+            </select>
+          </div>
           <div><label className="block text-[var(--muted-text)] mb-1">Product Name</label><input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required /></div>
           <div><label className="block text-[var(--muted-text)] mb-1">Category</label><input type="text" value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required /></div>
-          <div><label className="block text-[var(--muted-text)] mb-1">Price</label><input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required /></div>
-          <div><label className="block text-[var(--muted-text)] mb-1">Stock</label><input type="number" value={stock} onChange={e => setStock(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required /></div>
+          <div><label className="block text-[var(--muted-text)] mb-1">Price</label><input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required /></div>
+          <div><label className="block text-[var(--muted-text)] mb-1">Stock (local only)</label><input type="number" value={stock} onChange={e => setStock(e.target.value)} className="w-full bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" /></div>
         </div>
         <div><label className="block text-gray-400 mb-1">Description</label><textarea value={description} onChange={e => setDescription(e.target.value)} rows="4" className="w-full bg-gray-700 rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none" required></textarea></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -197,6 +228,37 @@ const ProductsPage = ({ products, filter, setProductFilter, viewingProduct, setV
   // Dev review controls removed; admin approves externally.
   const dispatch = useDispatch();
   const activeShopId = useSelector(s => s.shops.activeShopId);
+
+  // Load my products on mount once authenticated (token handled by interceptor)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data } = await apiClient.get('/products/mine/');
+        if (!mounted) return;
+        // Map to UI shape (category/specs not provided by backend demo)
+        const mapped = (Array.isArray(data) ? data : []).map(p => ({
+          id: p.id,
+          shopId: p.shop,
+          name: p.name,
+          category: p.category || '',
+          price: Number(p.price),
+          stock: 0,
+          description: p.description || '',
+          imageUrl: `https://placehold.co/600x400/1E293B/FFFFFF?text=${encodeURIComponent(p.name)}`,
+          images: [],
+          specifications: [],
+          status: p.status || 'pending',
+          reviews: [],
+          reports: [],
+        }));
+        dispatch(setProducts(mapped));
+      } catch {
+        // If 401, user not approved/logged in; ignore here
+      }
+    })();
+    return () => { mounted = false; };
+  }, [dispatch]);
 
   const filteredProducts = useMemo(() => products
     .filter(p => !activeShopId || p.shopId === activeShopId)

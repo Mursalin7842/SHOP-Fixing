@@ -17,6 +17,13 @@ Chart.register(
 );
 
 const SellerDetailsPage = ({ seller, onBack }) => {
+    // Normalize seller object to avoid undefined access errors
+    const safeSeller = {
+        ...seller,
+        shops: Array.isArray(seller?.shops) ? seller.shops : [],
+        transactions: Array.isArray(seller?.transactions) ? seller.transactions : [],
+        documents: (seller && seller.documents && typeof seller.documents === 'object') ? seller.documents : { nid: 'pending', businessLicense: 'pending' },
+    };
     const [activeTab, setActiveTab] = useState('overview');
     const [viewingProduct, setViewingProduct] = useState(null);
     const revenueChartRef = useRef(null);
@@ -55,7 +62,7 @@ const SellerDetailsPage = ({ seller, onBack }) => {
             case 'shops':
                 return (
                     <div>
-                        {seller.shops.map(shop => (
+                        {safeSeller.shops.map(shop => (
                             <div key={shop.id} className="p-4 rounded-lg border mb-4" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-color)' }}>
                                 <h4 className="text-lg font-bold">{shop.name}</h4>
                                 <p>
@@ -63,8 +70,8 @@ const SellerDetailsPage = ({ seller, onBack }) => {
                                     <span className="font-semibold ml-1 px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' }}>{shop.performance}</span>
                                 </p>
                                 <div className="mt-4">
-                                    <h5 className="font-semibold mb-2">Products ({shop.products.length})</h5>
-                                    {shop.products.map(product => (
+                                    <h5 className="font-semibold mb-2">Products ({Array.isArray(shop.products) ? shop.products.length : 0})</h5>
+                                    {(Array.isArray(shop.products) ? shop.products : []).map(product => (
                                         <div
                                             key={product.id}
                                             onClick={() => setViewingProduct(product)}
@@ -87,7 +94,7 @@ const SellerDetailsPage = ({ seller, onBack }) => {
                         <table className="w-full text-left">
                             <thead><tr style={{ backgroundColor: 'var(--table-header-bg)' }}><th className="p-2">Date</th><th className="p-2">Order ID</th><th className="p-2">Amount</th><th className="p-2">Status</th></tr></thead>
                             <tbody>
-                                {seller.transactions.map(t => (
+                                {safeSeller.transactions.map(t => (
                                     <tr key={t.id} className="border-b hover:bg-[var(--table-row-hover)]" style={{ borderColor: 'var(--border-color)' }}>
                                         <td className="p-2">{t.date}</td>
                                         <td className="p-2 font-mono">{t.orderId}</td>
@@ -106,7 +113,7 @@ const SellerDetailsPage = ({ seller, onBack }) => {
                     <div className="space-y-4">
                         <div className="p-4 rounded-lg flex items-center justify-between border" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-color)' }}>
                             <div className="flex items-center gap-3"><FileTextIcon /> <span>National ID (NID)</span></div>
-                            {seller.documents.nid === 'verified' ? (
+                            {safeSeller.documents.nid === 'verified' ? (
                                 <span className="flex items-center gap-2 px-2 py-0.5 rounded text-sm font-medium" style={{ backgroundColor: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' }}><CheckCircleIcon /> Verified</span>
                             ) : (
                                 <span className="px-2 py-0.5 rounded text-sm font-medium" style={{ backgroundColor: 'var(--badge-yellow-bg)', color: 'var(--badge-yellow-text)' }}>Pending</span>
@@ -114,7 +121,7 @@ const SellerDetailsPage = ({ seller, onBack }) => {
                         </div>
                         <div className="p-4 rounded-lg flex items-center justify-between border" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-color)' }}>
                             <div className="flex items-center gap-3"><FileTextIcon /><span>Business License</span></div>
-                            {seller.documents.businessLicense === 'verified' ? (
+                            {safeSeller.documents.businessLicense === 'verified' ? (
                                 <span className="flex items-center gap-2 px-2 py-0.5 rounded text-sm font-medium" style={{ backgroundColor: 'var(--badge-green-bg)', color: 'var(--badge-green-text)' }}><CheckCircleIcon /> Verified</span>
                             ) : (
                                 <span className="px-2 py-0.5 rounded text-sm font-medium" style={{ backgroundColor: 'var(--badge-yellow-bg)', color: 'var(--badge-yellow-text)' }}>Pending</span>
@@ -135,10 +142,10 @@ const SellerDetailsPage = ({ seller, onBack }) => {
                 </button>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="md:col-span-1 space-y-4 p-4 rounded-lg self-start border" style={{ backgroundColor: 'var(--surface-2)', borderColor: 'var(--border-color)' }}>
-                        <h3 className="text-xl font-bold">{seller.name}</h3>
+                        <h3 className="text-xl font-bold">{safeSeller.name}</h3>
                         <div><p style={{ color: 'var(--muted-text)' }}>Seller ID</p><p className="font-mono">{seller.id}</p></div>
-                        <div><p style={{ color: 'var(--muted-text)' }}>Email</p><p>{seller.email}</p></div>
-                        <div><p style={{ color: 'var(--muted-text)' }}>Member Since</p><p>{seller.memberSince}</p></div>
+                        <div><p style={{ color: 'var(--muted-text)' }}>Email</p><p>{safeSeller.email || 'N/A'}</p></div>
+                        <div><p style={{ color: 'var(--muted-text)' }}>Member Since</p><p>{safeSeller.memberSince || '—'}</p></div>
                     </div>
                     <div className="md:col-span-3">
                         <div className="flex space-x-1 border-b mb-4" style={{ borderColor: 'var(--border-color)' }}>

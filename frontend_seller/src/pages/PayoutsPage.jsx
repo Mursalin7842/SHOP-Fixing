@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StatusBadge from '../components/StatusBadge';
 import { useDispatch, useSelector } from 'react-redux';
 import { requestPayout, cancelPayout } from '../features/payoutSlice';
 import Button from '../components/Button';
+import { sellerPayoutsApi } from '../api/api';
 
 const currency = (n) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
 
@@ -11,16 +12,30 @@ const PayoutsPage = () => {
   const { balance, pending, history } = useSelector(state => state.payouts);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState('Bank Transfer');
+  const [bankInfo, setBankInfo] = useState({ bank_name: '', account_number: '', routing_number: '', holder_name: '' });
+  const [mobileInfo, setMobileInfo] = useState({ mobile_provider: '', mobile_wallet_number: '' });
+  const [cardInfo, setCardInfo] = useState({ card_brand: '', card_last4: '' });
+
+  // Load existing payout requests
+  useEffect(() => {
+    sellerPayoutsApi.list().then(() => {
+      // Could hydrate local redux if desired. For now, ignore if structure differs.
+    }).catch(() => {});
+  }, []);
 
   const canSubmit = () => {
     const a = Number(amount);
     return a > 0 && a <= balance.available;
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!canSubmit()) return;
     dispatch(requestPayout({ amount: Number(amount), method }));
+    // fire backend create
+    const payload = { amount: Number(amount), method: method === 'Bank Transfer' ? 'BANK' : method === 'Mobile Wallet' ? 'MOBILE' : 'CARD',
+      ...bankInfo, ...mobileInfo, ...cardInfo };
+    try { await sellerPayoutsApi.create(payload); } catch { /* ignore */ }
     setAmount('');
   };
 
@@ -48,6 +63,26 @@ const PayoutsPage = () => {
               <option>PayPal</option>
             </select>
           </div>
+          {method === 'Bank Transfer' && (
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Bank Name" value={bankInfo.bank_name} onChange={e=>setBankInfo({...bankInfo, bank_name: e.target.value})} />
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Account Number" value={bankInfo.account_number} onChange={e=>setBankInfo({...bankInfo, account_number: e.target.value})} />
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Routing Number" value={bankInfo.routing_number} onChange={e=>setBankInfo({...bankInfo, routing_number: e.target.value})} />
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Account Holder" value={bankInfo.holder_name} onChange={e=>setBankInfo({...bankInfo, holder_name: e.target.value})} />
+            </div>
+          )}
+          {method === 'Mobile Wallet' && (
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Provider (e.g. bKash/Nagad)" value={mobileInfo.mobile_provider} onChange={e=>setMobileInfo({...mobileInfo, mobile_provider: e.target.value})} />
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Wallet Number" value={mobileInfo.mobile_wallet_number} onChange={e=>setMobileInfo({...mobileInfo, mobile_wallet_number: e.target.value})} />
+            </div>
+          )}
+          {method === 'PayPal' && (
+            <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Card Brand" value={cardInfo.card_brand} onChange={e=>setCardInfo({...cardInfo, card_brand: e.target.value})} />
+              <input className="bg-[var(--input-bg)] text-[var(--input-text)] rounded p-2" placeholder="Card Last 4" value={cardInfo.card_last4} onChange={e=>setCardInfo({...cardInfo, card_last4: e.target.value})} />
+            </div>
+          )}
           <div className="flex gap-3 md:justify-start justify-stretch">
             <Button color="primary" type="submit" disabled={!canSubmit()}>Request</Button>
             <Button color="gray" type="button" onClick={() => setAmount('')}>Clear</Button>
@@ -80,7 +115,7 @@ const PayoutsPage = () => {
                       <td className="p-3">{p.method}</td>
                       <td className="p-3">{p.requestedAt}</td>
                       <td className="p-3 text-right align-middle">
-                        <Button color="gray" onClick={() => dispatch(cancelPayout(p.id))}>Cancel</Button>
+                        <Button color="gray" onClick={async () => { dispatch(cancelPayout(p.id)); try { await sellerPayoutsApi.cancel(p.id); } catch { /* ignore */ } }}>Cancel</Button>
                       </td>
                     </tr>
                   ))}
@@ -104,6 +139,7 @@ const PayoutsPage = () => {
                     <th className="p-3">Requested</th>
                     <th className="p-3">Processed</th>
                     <th className="p-3">Status</th>
+                    <th className="p-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -115,6 +151,11 @@ const PayoutsPage = () => {
                       <td className="p-3">{h.requestedAt}</td>
                       <td className="p-3">{h.processedAt || '-'}</td>
                       <td className="p-3"><StatusBadge status={h.status} /></td>
+                      <td className="p-3 text-right align-middle">
+                        {h.status === 'Approved' && (
+                          <Button color="primary" onClick={async () => { try { await sellerPayoutsApi.confirm(h.id); } catch { /* ignore */ } }}>Withdraw</Button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

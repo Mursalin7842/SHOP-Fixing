@@ -4,6 +4,7 @@ import SellerLayout from './layouts/SellerLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import PendingApprovalPage from './pages/PendingApprovalPage';
+import { clearAuthTokens } from './api/api';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, setProductFilter, setViewingProduct } from './features/productSlice';
@@ -19,7 +20,7 @@ function SellerApp() {
   const dispatch = useDispatch();
 
   const handleLogin = (user) => { setUserInfo(user); setAuthState('authenticated'); };
-  const handleLogout = () => { setUserInfo(null); setAuthState('unauthenticated'); };
+  const handleLogout = () => { clearAuthTokens(); setUserInfo(null); setAuthState('unauthenticated'); };
   const handleRegister = () => setAuthState('pending_approval');
 
   useEffect(() => {

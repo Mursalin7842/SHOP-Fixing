@@ -3,22 +3,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import SearchBar from '../components/SearchBar';
 import StatusBadge from '../components/StatusBadge';
 import Button from '../components/Button';
-import { FETCH_ORDERS_REQUEST, FETCH_ORDERS_SUCCESS, FETCH_ORDERS_FAILURE, UPDATE_ORDER_STATUS } from '../constants/actionTypes';
+import { UPDATE_ORDER_STATUS } from '../constants/actionTypes';
+import { fetchOrders } from '../redux/actions/ordersActions';
 
 const Orders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const dispatch = useDispatch();
   const { loading, items, error } = useSelector(s => s.orders);
 
-  useEffect(() => {
-    dispatch({ type: FETCH_ORDERS_REQUEST });
-    try {
-      dispatch({ type: FETCH_ORDERS_SUCCESS, payload: items });
-    } catch (e) {
-      dispatch({ type: FETCH_ORDERS_FAILURE, payload: e.message || 'Failed to fetch orders' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  useEffect(() => { dispatch(fetchOrders()); }, [dispatch]);
 
   const filtered = useMemo(() => (items || []).filter(o => [o.id, o.shop, o.customer].some(f => (f||'').toLowerCase().includes(searchTerm.toLowerCase()))), [items, searchTerm]);
 
