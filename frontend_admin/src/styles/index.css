@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --purple-dark: #312e81;
+  --purple-light: #3b82f6;
+  --purple-text: #312e81;
+  --deep-violet: #1e293b;
+  --light-bg: #ffffff;
+  --dark-bg: #111827;
+  --light-text: #1a202c;
+  --dark-text: #f9fafb;
+
+  --btn-green: #22c55e;
+  --btn-yellow: #eab308;
+  --btn-red: #ef4444;
+  --btn-gray: #64748b;
+  /* Primary action button color (blue) */
+  --button-primary: #2563eb; /* blue-600 */
+  --button-primary-text: #ffffff;
+
+  --badge-green-bg: #bbf7d0;
+  --badge-green-text: #166534;
+  --badge-yellow-bg: #fef9c3;
+  --badge-yellow-text: #854d0e;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #991b1b;
+
+  /* Default fallbacks (overridden by body.light/.dark) */
+  --background-color: #0b1220;
+  --text-color: #f9fafb;
+  --component-bg: #232946;
+  --component-text: #ffffff;
+  --surface-1: #1f2937; /* cards/panels */
+  --surface-2: #111827; /* subtle blocks, table hover */
+  --border-color: #374151;
+  --muted-text: #9ca3af;
+  --input-bg: #111827;
+  --input-text: #f9fafb;
+  --table-header-bg: #0f172a;
+  --table-row-hover: #1f2937;
+  --chip-bg: #374151;
+  --sidebar-link-color: #ffffff;
+  --overlay-bg: rgba(55, 65, 81, 0.5); /* gray-700 @ 50% */
+  --table-row-alt: #0f172a; /* default alt row bg (overridden per theme) */
+  --button-border-color: #4b5563; /* default button border */
+  --button-hover-border-color: #6b7280; /* default button border on hover */
+}
+
+body.dark {
+  --background-color: var(--dark-bg);
+  --text-color: var(--dark-text);
+  --component-bg: #232946; /* darker sidebar/header for dark theme */
+  --component-text: #fff; /* white text for sidebar/header in dark theme */
+  --sidebar-item-bg: #232946;
+  --sidebar-hover-bg: #374151;
+  --sidebar-active-bg: var(--purple-light);
+  --sidebar-link-color: #ffffff;
+  --surface-1: #1f2937; /* slate-800 */
+  --surface-2: #111827; /* gray-900 */
+  --border-color: #374151; /* gray-700 */
+  --muted-text: #9ca3af; /* gray-400 */
+  --input-bg: #111827;
+  --input-text: #f9fafb;
+  --table-header-bg: #0f172a; /* slate-950 */
+  --table-row-hover: #1f2937;
+  --chip-bg: #374151;
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --table-row-alt: #0f172a; /* slate-950 for subtle zebra */
+  --button-border-color: #4b5563; /* gray-600 */
+  --button-hover-border-color: #6b7280; /* gray-500 */
+}
+
+body.light {
+  --background-color: #ffffff; /* white background for main content */
+  --text-color: #111827; /* very dark text for maximum contrast */
+  --component-bg: #c6ced6; /* soften ~3% further */
+  --component-text: #111827; /* keep dark text for readability in cards and wrappers */
+  --sidebar-item-bg: #e5e7eb; /* gray-200 */
+  --sidebar-hover-bg: #d1d5db; /* gray-300 */
+  --sidebar-active-bg: var(--purple-light);
+  --sidebar-link-color: #2563eb; /* blue-600 for links on light */
+  --surface-1: #ffffff; /* white cards */
+  --surface-2: #f5f7fb; /* slightly lighter separation */
+  --border-color: #cbd5e1; /* slate-300: slightly lighter separators */
+  --muted-text: #374151; /* gray-700: much clearer muted text */
+  --input-bg: #ffffff;
+  --input-text: #111827;
+  --table-header-bg: #d1d5db; /* gray-300: a bit lighter */
+  --table-row-hover: #eaedf2; /* slightly lighter hover */
+  --chip-bg: #d5dbe3; /* slightly lighter chips */
+  --overlay-bg: rgba(107, 114, 128, 0.42); /* slightly lighter overlay */
+  --table-row-alt: #f8fafc; /* slate-50: softer zebra */
+  --button-border-color: #d1d5db; /* gray-300 */
+  --button-hover-border-color: #c6ced6; /* softened hover border */
+}
+
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+/* Subtle elevation in light mode for sections/panels */
+.card, .panel {
+  background-color: var(--surface-1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  border-radius: 0.5rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--button-border-color);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  /* background-color removed to allow Tailwind and inline styles */
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: var(--button-hover-border-color);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Improve table readability, especially in light mode */
+table tbody tr:nth-child(even) {
+  background-color: var(--table-row-alt);
+}
+table tbody tr:hover {
+  background-color: var(--table-row-hover);
+}
