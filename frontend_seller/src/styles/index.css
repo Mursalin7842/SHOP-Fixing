@@ -1,0 +1,242 @@
+@import "tailwindcss";
+
+:root {
+  --purple-dark: #312e81;
+  --purple-light: #3b82f6;
+  --purple-text: #312e81;
+  --deep-violet: #1e293b;
+  --light-bg: #ffffff;
+  --dark-bg: #111827;
+  --light-text: #1a202c;
+  --dark-text: #f9fafb;
+
+  --btn-green: #22c55e;
+  --btn-yellow: #eab308;
+  --btn-red: #ef4444;
+  --btn-gray: #64748b;
+  /* Primary action button color (blue) */
+  --button-primary: #2563eb; /* blue-600 */
+  --button-primary-text: #ffffff;
+
+  --badge-green-bg: #bbf7d0;
+  --badge-green-text: #166534;
+  --badge-yellow-bg: #fef9c3;
+  --badge-yellow-text: #854d0e;
+  --badge-red-bg: #fee2e2;
+  --badge-red-text: #991b1b;
+
+  /* Default fallbacks (overridden by body.light/.dark) */
+  --background-color: #0b1220;
+  --text-color: #f9fafb;
+  --component-bg: #232946;
+  --component-text: #ffffff;
+  --surface-1: #1f2937; /* cards/panels */
+  --surface-2: #111827; /* subtle blocks, table hover */
+  --border-color: #374151;
+  --muted-text: #9ca3af;
+  --input-bg: #111827;
+  --input-text: #f9fafb;
+  --table-header-bg: #0f172a;
+  --table-row-hover: #1f2937;
+  --chip-bg: #374151;
+  --sidebar-link-color: #ffffff;
+  --sidebar-hover-text: #111827;
+  --overlay-bg: rgba(55, 65, 81, 0.5);
+  --table-row-alt: #0f172a;
+  --button-border-color: #4b5563;
+  --button-hover-border-color: #6b7280;
+}
+
+body.dark {
+  --background-color: var(--dark-bg);
+  --text-color: var(--dark-text);
+  --component-bg: #232946; /* darker sidebar/header for dark theme */
+  --component-text: #fff; /* white text for sidebar/header in dark theme */
+  --sidebar-item-bg: #232946;
+  --sidebar-hover-bg: #374151;
+  --sidebar-active-bg: var(--purple-light);
+  --sidebar-link-color: #ffffff;
+  --surface-1: #1f2937; /* slate-800 */
+  --surface-2: #111827; /* gray-900 */
+  --border-color: #374151; /* gray-700 */
+  --muted-text: #9ca3af; /* gray-400 */
+  --input-bg: #111827;
+  --input-text: #f9fafb;
+  --table-header-bg: #0f172a; /* slate-950 */
+  --table-row-hover: #1f2937;
+  --chip-bg: #374151;
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --table-row-alt: #0f172a; /* slate-950 for subtle zebra */
+  --button-border-color: #4b5563; /* gray-600 */
+  --button-hover-border-color: #6b7280; /* gray-500 */
+
+  /* Semantic text colors */
+  --positive-text: #86efac; /* green-300 */
+  --negative-text: #fca5a5; /* red-300 */
+
+  /* Status badges (dark mode) */
+  --status-approved-bg: #064e3b; /* emerald-950 */
+  --status-approved-text: #a7f3d0; /* emerald-200 */
+  --status-pending-bg: #374151; /* gray-700 */
+  --status-pending-text: #e5e7eb; /* gray-200 */
+  --status-modification-bg: #78350f; /* amber-900 */
+  --status-modification-text: #fde68a; /* amber-200 */
+  --status-rejected-bg: #7f1d1d; /* red-900 */
+  --status-rejected-text: #fecaca; /* red-200 */
+}
+
+body.light {
+  --background-color: #ffffff; /* white background for main content */
+  --text-color: #111827; /* very dark text for maximum contrast */
+  --component-bg: #c6ced6; /* soften ~3% further */
+  --component-text: #111827; /* keep dark text for readability in cards and wrappers */
+  --sidebar-item-bg: #e5e7eb; /* gray-200 */
+  --sidebar-hover-bg: #d1d5db; /* gray-300 */
+  --sidebar-active-bg: var(--purple-light);
+  --sidebar-link-color: #2563eb; /* blue-600 for links on light */
+  --surface-1: #ffffff; /* white cards */
+  --surface-2: #f5f7fb; /* slightly lighter separation */
+  --border-color: #94a3b8; /* slate-400: darker for stronger separation */
+  --muted-text: #374151; /* gray-700: much clearer muted text */
+  --input-bg: #f8fafc; /* subtle off-white so fields are visible on white cards */
+  --input-text: #111827;
+  --table-header-bg: #d1d5db; /* gray-300: a bit lighter */
+  --table-row-hover: #eaedf2; /* slightly lighter hover */
+  --chip-bg: #d5dbe3; /* slightly lighter chips */
+  --overlay-bg: rgba(107, 114, 128, 0.42); /* slightly lighter overlay */
+  --table-row-alt: #f8fafc; /* slate-50: softer zebra */
+  --button-border-color: #94a3b8; /* slate-400 for component/button edges */
+  --button-hover-border-color: #64748b; /* slate-500 on hover for clarity */
+
+  /* Controls: blue by default, black on focus */
+  --input-border-color: #3b82f6; /* blue-500 */
+  --input-hover-border-color: #2563eb; /* blue-600 */
+
+  /* Status badges (light mode) */
+  --status-approved-bg: #dcfce7; /* green-100 */
+  --status-approved-text: #166534; /* green-700 */
+  --status-pending-bg: #e5e7eb; /* gray-200 */
+  --status-pending-text: #374151; /* gray-700 */
+  --status-modification-bg: #fef9c3; /* yellow-100 */
+  --status-modification-text: #854d0e; /* yellow-800 */
+  --status-rejected-bg: #fee2e2; /* red-100 */
+  --status-rejected-text: #991b1b; /* red-800 */
+
+  /* Semantic text colors */
+  --positive-text: #166534; /* green-700 */
+  --negative-text: #991b1b; /* red-800 */
+}
+
+/* Make inputs and selects have stronger borders in light mode without touching other components */
+body.light input,
+body.light select,
+body.light textarea {
+  /* Override the local variable used by border-[var(--border-color)] utility */
+  --border-color: var(--input-border-color);
+  border: 1px solid var(--border-color);
+}
+body.light input:hover,
+body.light select:hover,
+body.light textarea:hover {
+  --border-color: var(--input-hover-border-color);
+}
+body.light input:focus,
+body.light select:focus,
+body.light textarea:focus {
+  --border-color: #000000; /* black on focus */
+}
+
+/* Shop selector wrappers: default blue, black when any child is focused */
+body.light .shop-selector {
+  --border-color: var(--input-border-color);
+}
+body.light .shop-selector:focus-within {
+  --border-color: #000000;
+}
+body.light .shop-selector select {
+  border: none; /* avoid double border inside wrapper */
+}
+
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+.card, .panel {
+  background-color: var(--surface-1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  border-radius: 0.5rem;
+}
+
+/* optional header bar for sections when needed */
+.card-header {
+  background-color: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Page content wrapper to avoid blending with white background in light mode */
+.page-section {
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+}
+
+/* Light-mode elevation utilities */
+body.light .elevated-header {
+  /* faint divider + depth without harsh borders */
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.08);
+}
+body.light .elevated-header::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 12px;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.08), rgba(15, 23, 42, 0));
+  pointer-events: none;
+}
+
+/* Optional: soft elevation for sections in light mode without heavy borders */
+body.light .elevated-card {
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid var(--button-border-color);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: var(--button-hover-border-color);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: var(--table-row-alt);
+}
+table tbody tr:hover {
+  background-color: var(--table-row-hover);
+}

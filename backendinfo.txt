@@ -1,0 +1,51 @@
+Here’s a quick readiness check and exactly what to wire to hook this admin panel to your backend (the DB is accessed via the backend; the frontend never talks to the database directly).
+
+Summary: Yes—it's backend-ready. You just need to point the Axios client to your API and replace mock-data calls with real endpoints.
+
+Checklist to connect
+
+Configure API base URL
+
+Create .env from .env.example and set:
+VITE_API_BASE_URL=http(s)://your-api-host
+Ensure src/api/api.js uses import.meta.env.VITE_API_BASE_URL for axios baseURL.
+Swap mock data to real endpoints
+
+Files to update (call api.get/post/put/delete and dispatch results):
+src/redux/actions/sellerActions.js
+src/redux/actions/shopActions.js
+src/redux/actions/productActions.js
+src/redux/actions/paymentActions.js
+src/redux/actions/reportActions.js
+Remove mock imports from src/api/mockData.js and replace with:
+Sellers: GET /sellers, POST /sellers/:id/approve, POST /sellers/:id/reject, etc.
+Shops: GET /shops, approve/reject endpoints.
+Products: GET /products?status=..., approve/reject/flag endpoints.
+Payments: GET /payouts, GET /transactions, details endpoints.
+Reports: GET /reports?status=..., PATCH /reports/:id (resolve).
+Reducers already handle loading/error states; verify payload shapes match.
+Auth (optional for now)
+
+If your API requires auth, add a request interceptor in src/api/api.js to attach Authorization headers (e.g., Bearer token).
+You currently have simple in-app login. Replace later with real auth when ready.
+CORS and response shapes
+
+Enable CORS on the backend for your Vite origin (http://localhost:5173 by default).
+Match frontend expectations: keys like id, name, status, dates, pagination fields (page, size, total).
+UX details to confirm
+
+Pagination/sorting/filtering: backend should accept these query params if you need them.
+Error messages: backend should return JSON with a message field; reducers display it.
+Dates/amounts: ensure formatting matches the UI (e.g., amounts as numbers).
+Where to look/modify
+
+API client: src/api/api.js
+Actions: src/redux/actions/*
+Reducers: src/redux/reducers/* (already wired)
+Pages calling actions:
+Sellers: SellerApproval.jsx, SellerManagement.jsx
+Shops: ShopApproval.jsx
+Products: ProductApproval.jsx
+Payments: PaymentManagement.jsx, details in src/components/payment/*
+Reports: UserReports.jsx
+Want me to flip the actions to real API calls for your endpoint paths now? Provide the base URL and endpoints, and I’ll wire them end-to-end.

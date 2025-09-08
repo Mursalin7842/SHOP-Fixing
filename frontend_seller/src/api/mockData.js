@@ -1,0 +1,1 @@
+export { MOCK_PRODUCTS_DATA, MOCK_ORDERS_DATA, MOCK_SHOPS_DATA } from '../data';
